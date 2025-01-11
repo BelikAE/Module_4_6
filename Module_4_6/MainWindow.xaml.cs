@@ -15,14 +15,75 @@ using System.Windows.Shapes;
 
 namespace Module_4_6
 {
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    enum Precipitation
     {
-        public MainWindow()
+        sunny = 0,
+        cloudy = 1,
+        rain = 2,
+        snow = 3
+    }
+    class WeatherControl : DependencyObject
+    {
+        private Precipitation precipitation;
+
+        public string WindDirection { get; set; }
+        public int WindSpeed { get; set; }
+
+        public static readonly DependencyProperty TemperatureProperty;
+        public int Temperature
         {
-            InitializeComponent();
+            get => (int)GetValue(TemperatureProperty);
+            set => SetValue(TemperatureProperty, value);
+        }
+
+        public WeatherControl(string windDirection, int windSpeed, Precipitation precipitation, int temperature)
+        {
+            this.WindDirection = windDirection;
+            this.WindSpeed = windSpeed;
+            this.precipitation = precipitation;
+            this.Temperature = temperature;
+        }
+
+        static WeatherControl()
+        {
+            TemperatureProperty = DependencyProperty.Register(
+                nameof(Temperature),
+                typeof(int),
+                typeof(WeatherControl),
+                new FrameworkPropertyMetadata(
+                    0,
+                    FrameworkPropertyMetadataOptions.AffectsMeasure |
+                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    null,
+                    new CoerceValueCallback(CoerceTemperature)),
+                new ValidateValueCallback(ValidateTemperature));
+        }
+
+        private static bool ValidateTemperature(object value)
+        {
+            int v = (int) value;
+            if (v >= -50 && v <=50)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private static object CoerceTemperature(DependencyObject d, object baseValue)
+        {
+            int v = (int)baseValue;
+            if (v >= -50 && v <= 50)
+            {
+                return v;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
+
